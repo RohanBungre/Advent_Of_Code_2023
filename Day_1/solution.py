@@ -6,3 +6,12 @@ def read_input(filename: str) -> List[str]:
     with open(file=filename, encoding="utf-8") as f:
         input_list = [line.rstrip() for line in f]
     return input_list
+
+
+def main() -> None:
+    """Main function"""
+    print("hello")
+
+
+if __name__ == "__main__":
+    main()
