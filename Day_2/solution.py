@@ -1,6 +1,50 @@
 import os
 import re
+from dataclasses import dataclass
 from typing import List
+
+
+@dataclass
+class Set:
+    """Dataclass to store a Game's induvidual Set object."""
+
+    red: int = 0
+    green: int = 0
+    blue: int = 0
+
+
+@dataclass
+class Game:
+    """Dataclass to store a each Game object."""
+
+    id: int
+    set_list: List[Set]
+
+    def max_red(self) -> int:
+        return max([value.red for value in self.set_list])
+
+    def max_green(self) -> int:
+        return max([value.green for value in self.set_list])
+
+    def max_blue(self) -> int:
+        return max([value.blue for value in self.set_list])
+
+    def is_valid(self, red_limit, green_limit, blue_limit) -> bool:
+        if (
+            self.max_red() > red_limit
+            or self.max_green() > green_limit
+            or self.max_blue() > blue_limit
+        ):
+            return False
+        else:
+            return True
+
+
+@dataclass
+class Games:
+    """Dataclass to store a collection of Game objects."""
+
+    game_list: List[Game]
 
 
 def read_input(filename: str) -> List[str]:
@@ -10,45 +54,61 @@ def read_input(filename: str) -> List[str]:
     return input_list
 
 
-def find_max_colour(input_string: str, colour: str) -> int:
-    """Finds the max number of dice for a given colour."""
-    pattern = rf"[0-9]+\s{colour}+"
-    regex_pattern = re.compile(pattern=pattern, flags=re.IGNORECASE)
-    match_strings = regex_pattern.findall(string=input_string)
+def build_set_object(input_string) -> Set:
+    red_number: int = find_number_for_colour(
+        input_string=input_string, colour="red"
+    )
+    green_number: int = find_number_for_colour(
+        input_string=input_string, colour="green"
+    )
+    blue_number: int = find_number_for_colour(
+        input_string=input_string, colour="blue"
+    )
+    return Set(red=red_number, green=green_number, blue=blue_number)
 
+
+def build_games_object(input_str_list: List[str]) -> Games:
+    """Builds a Games object from the input data."""
+
+    game_obj_list: List[Game] = []
+
+    for input_game_str in input_str_list:
+        colon_split = input_game_str.split(sep=":")
+        game_id = int(colon_split[0].split(sep=" ")[-1])
+        semi_colon_split = colon_split[1].split(";")
+        set_obj_list: list[Set] = []
+
+        for string in semi_colon_split:
+            set_obj = build_set_object(string)
+            set_obj_list.append(set_obj)
+
+        game_obj = Game(id=game_id, set_list=set_obj_list)
+        game_obj_list.append(game_obj)
+
+    return Games(game_list=game_obj_list)
+
+
+def find_number_for_colour(input_string: str, colour: str) -> int:
+    """Finds the max number of dice for a given colour."""
+
+    pattern: str = rf"[0-9]+\s{colour}+"
+    regex_pattern: re.Pattern[str] = re.compile(
+        pattern=pattern, flags=re.IGNORECASE
+    )
+    match_strings: List[str] = regex_pattern.findall(string=input_string)
     if len(match_strings) == 0:
         return 0
-
-    number_int_list = []
-    for match_string in match_strings:
-        number_int_list.append(
-            int("".join(char for char in match_string if char.isdigit()))
-        )
-    max_number = max(number_int_list)
-    return max_number
-
-
-def is_valid_game(
-    input_string: str, no_red: int, no_green: int, no_blue: int
-) -> bool:
-    """Validates if a game is valid."""
-    max_red = find_max_colour(input_string=input_string, colour="red")
-    max_green = find_max_colour(input_string=input_string, colour="green")
-    max_blue = find_max_colour(input_string=input_string, colour="blue")
-    if max_red > no_red or max_green > no_green or max_blue > no_blue:
-        print(
-            input_string,
-            max_red > no_red,
-            max_green > no_green,
-            max_blue > no_blue,
-        )
-        return False
     else:
-        return True
+        match_string: str = match_strings[0]
+    found_number: int = int(
+        "".join(char for char in match_string if char.isdigit())
+    )
+    return found_number
 
 
 def part_one() -> None:
     """Calculates the results of Day 2 Part 1."""
+
     current_working_directory: str = os.path.realpath(
         os.path.join(os.getcwd(), os.path.dirname(__file__))
     )
@@ -57,23 +117,53 @@ def part_one() -> None:
         filename=current_working_directory + "/input.txt"
     )
 
-    valid_id_list = []
+    games_obj: Games = build_games_object(input_str_list=input_str_list)
 
-    for index, input_string in enumerate(input_str_list):
-        if is_valid_game(
-            input_string=input_string, no_red=12, no_green=13, no_blue=14
-        ):
-            valid_id_list.append(index + 1)
+    valid_id_list: List[int] = [
+        game_obj.id
+        for game_obj in games_obj.game_list
+        if game_obj.is_valid(red_limit=12, green_limit=13, blue_limit=14)
+    ]
 
     valid_id_list_sum = sum(valid_id_list)
 
-    print(valid_id_list)
-    print(valid_id_list_sum)
+    print(
+        "Day 2 - Part 1 - The sum of all of the valid ids is:",
+        valid_id_list_sum,
+    )
+
+
+def part_two() -> None:
+    """Calculates the results of Day 2 Part 2."""
+
+    current_working_directory: str = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__))
+    )
+
+    input_str_list: List[str] = read_input(
+        filename=current_working_directory + "/input.txt"
+    )
+
+    games_obj: Games = build_games_object(input_str_list=input_str_list)
+
+    power_list: List[int] = [
+        game_obj.max_red() * game_obj.max_green() * game_obj.max_blue()
+        for game_obj in games_obj.game_list
+    ]
+
+    power_list_sum = sum(power_list)
+
+    print(
+        "Day 2 - Part 1 - The sum of all of the powers is:",
+        power_list_sum,
+    )
 
 
 def main() -> None:
     """Main function"""
+
     part_one()
+    part_two()
 
 
 if __name__ == "__main__":

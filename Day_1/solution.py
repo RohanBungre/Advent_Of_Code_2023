@@ -4,6 +4,7 @@ from typing import Dict, List
 
 def read_input(filename: str) -> List[str]:
     """Reads input from a text file."""
+
     with open(file=filename, encoding="utf-8") as f:
         input_list = [line.rstrip() for line in f]
     return input_list
@@ -11,6 +12,7 @@ def read_input(filename: str) -> List[str]:
 
 def convert_spelled_number_to_char(input_list: List[str]) -> List[str]:
     """Converts a spelled out number into its character representation."""
+
     output_list: List[str] = []
     spelling_to_number_map: Dict[str, str] = {
         "one": "o1e",
@@ -36,6 +38,7 @@ def convert_spelled_number_to_char(input_list: List[str]) -> List[str]:
 
 def remove_non_digit_chars(input_list: List[str]) -> List[str]:
     """Removes all non digit characters from a list of strings."""
+
     output_list: List[str] = []
     for string in input_list:
         output_list.append("".join(char for char in string if char.isdigit()))
@@ -44,6 +47,7 @@ def remove_non_digit_chars(input_list: List[str]) -> List[str]:
 
 def first_and_last_number(input_list: List[str]) -> List[int]:
     """Takes the first and last number and generates an interger value."""
+
     output_list: List[int] = []
     for string_number in input_list:
         integer_number: int = (
@@ -55,6 +59,7 @@ def first_and_last_number(input_list: List[str]) -> List[int]:
 
 def part_one() -> None:
     """Calculates the results of Day 1 Part 1."""
+
     current_working_directory: str = os.path.realpath(
         os.path.join(os.getcwd(), os.path.dirname(__file__))
     )
@@ -81,6 +86,7 @@ def part_one() -> None:
 
 def part_two() -> None:
     """Calculates the results of Day 1 Part 2."""
+
     current_working_directory: str = os.path.realpath(
         os.path.join(os.getcwd(), os.path.dirname(__file__))
     )
@@ -111,6 +117,7 @@ def part_two() -> None:
 
 def main() -> None:
     """Main function"""
+
     part_one()
     part_two()
 
